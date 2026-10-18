@@ -46,13 +46,13 @@
         <div id="chat-container" class="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-900/50">
             <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 max-w-[85%]">
                 <p class="text-sm text-emerald-300 font-semibold mb-1">مرحباً بك!</p>
-                <p class="text-sm text-slate-300">للبدء: أدخل مفتاح الـ API، وسيقوم النظام بتحليل الملف تلقائياً. يمكنك طرح أي سؤال حول المبيعات والمنتجات والعملاء وسيجيبك الذكاء الاصطناعي فوراً.</p>
+                <p class="text-sm text-slate-300">للبدء: أدخل مفتاح الـ API، وسيقوم النظام بتحليل الملف تلقائياً. المساعد مخصص حصرياً للإجابة على استفسارات بيانات المبيعات الحقيقية فقط.</p>
             </div>
         </div>
 
         <!-- Input Area -->
         <div class="p-4 bg-slate-800 border-t border-slate-700 flex gap-2">
-            <input type="text" id="user-input" placeholder="اكتب سؤالك هنا (مثلاً: كم عدد الصفوف؟ ما هي أصل المبيعات؟)..." 
+            <input type="text" id="user-input" placeholder="اكتب سؤالك حول المبيعات هنا..." 
                 class="flex-1 bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500 disabled:opacity-50" disabled>
             <button id="send-btn" onclick="askGemini()" 
                 class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-3 rounded-xl transition-all disabled:opacity-50 cursor-pointer" disabled>
@@ -70,7 +70,6 @@
 
         // تحميل الملف تلقائياً من جيثب عند فتح الصفحة
         window.addEventListener('DOMContentLoaded', () => {
-            // نحاول قراءة الملف من المجلدات الموجودة في المستودع
             const defaultPaths = [
                 '../01_Python_Cleaning/train_cleaned.csv',
                 '../02_python_processing/train_cleaned.csv',
@@ -134,7 +133,6 @@
             globalColumns = lines[0];
             totalRowCount = lines.length - 1;
             
-            // احتفاظ بالنص كاملاً للتحليل
             globalDataSummary = csvText;
 
             const badge = document.getElementById('status-badge');
@@ -162,20 +160,29 @@
 
             const loadingId = appendMessage("الذكاء الاصطناعي", "جاري التحليل والبحث في كامل البيانات...", "amber", true);
 
-            // إرسال عينة البيانات مع العدد الإجمالي لمنع تجاوز الحدود النصية للـ API
             const lines = globalDataSummary.trim().split('\n');
             const sampleData = lines.slice(0, 500).join('\n');
 
+            // 🔒 تعليمات صارمة تمنع النموذج من الخروج عن نطاق البيانات أو الإجابة خارجها
             const prompt = `
-أنت خبير تحليل بيانات محترف ومساعد ذكي للتحليل.
-ملاحظة هامة جداً: إجمالي عدد الصفوف الكلي الحقيقي الموجود في ملف البيانات هو: [ ${totalRowCount} صف ].
-أسماء أعمدة الجدول المتاحة: [ ${globalColumns} ]
+أنت مساعد تحليل بيانات ذكي ومخصص حصرياً للإجابة على الأسئلة المتعلقة ببيانات ملف المبيعات (OnlineStoreDB) فقط.
 
-إليك عينة تمثيلية واسعة من أصل الـ ${totalRowCount} صف الخاصة بالبيانات:
+التعليمات الصارمة:
+1. التزم تماماً بالبيانات المتاحة والعينة المقدمة وإجمالي الصفوف (${totalRowCount} صف) وأسماء الأعمدة ([${globalColumns}]).
+2. ممنوع منعاً باتاً الإجابة على أي أسئلة خارج نطاق البيانات أو غير مرتبطة بملف المبيعات والتحليلات الخاصة به (مثل الأسئلة العامة، البرمجة، الرياضات، السياسة، إلخ).
+3. إذا كان سؤال المستخدم غير موجود في البيانات أو خارج نطاق ملف المبيعات، يجب عليك الرد بوضوح تام بهذا النص بالحرف: "عذراً، أنا مخصص فقط للإجابة على الأسئلة والاستفسارات المتعلقة ببيانات ملف المبيعات الحالي فقط."
+4. لا تخترع أو تفترض أي أرقام أو معلومات غير موجودة في البيانات الفعلية.
+
+إجمالي عدد الصفوف الكلي: ${totalRowCount} صف.
+أسماء الأعمدة: [${globalColumns}]
+
+عينة من بيانات المبيعات:
 ${sampleData}
 
-بناءً على تفاصيل ومعطيات البيانات وإجمالي الصفوف (${totalRowCount} صف)، أجِب عن سؤال المستخدم بدقة واحترافية وباللغة العربية:
+سؤال المستخدم:
 ${userInput}
+
+أجِب بدقة واحترافية بناءً على البيانات فقط وحسب التعليمات الصارمة أعلاه:
             `;
 
             try {
