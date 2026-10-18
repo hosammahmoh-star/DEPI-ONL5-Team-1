@@ -1,7 +1,17 @@
 # ITC_ONL5_DAT3_G1_group 1
 # 🛒 OnlineStoreDB - End-to-End Retail Sales Data Engineering & BI Analytics
 
-An enterprise-grade Data Engineering and Analytics solution transforming 9,800 raw retail sales records into a highly normalized SQL Server Relational Database, enriched with custom SQL Views, and visualized via an interactive Power BI Dashboard & Client-Side Web Application.
+An enterprise-grade Data Engineering and Analytics solution transforming 9,800 raw retail sales records into a highly normalized SQL Server Relational Database, enriched with custom SQL Views, and visualized via an interactive Power BI Dashboard.
+
+---
+
+## 👥 Team Workflows & Division of Labor
+
+- **Data Cleaning:** Initial inspection, missing values treatment, date parsing, and standardizing data formats.
+- **Python Data Engineering & Normalization:** Automated script (`onlinestore_data.py`) to split the flat dataset into 4 relational entities (Customers, Products, Orders, OrderDetails).
+- **SQL Database Architecture & DDL:** Designing relational tables, primary/foreign keys, and Bulk Insert pipelines.
+- **SQL Analytics & Views:** Building analytical queries and reusable SQL Views (`vw_FullOrderReport`, `vw_CustomerSales`, `vw_ProductPerformance`) to streamline reporting.
+- **DAX & Power BI Dashboard:** Developing financial/sales measures and designing an executive interactive visual dashboard.
 
 ---
 
@@ -10,14 +20,13 @@ An enterprise-grade Data Engineering and Analytics solution transforming 9,800 r
 - [ Raw Data (train.csv) ] 
        │
        ▼ (Python / Pandas Automation & Normalization)
-- [ 4 Cleaned CSV Files ] 
+- [ Cleaned & Relational CSV Files ] 
        │
-       ▼ (SQL Server 2025 / SSMS Architecture & Constraints)
+       ▼ (SQL Server / SSMS Architecture & Constraints)
 - [ OnlineStoreDB Relational Database ]
        │
        ├──► (SQL Analytics & Analytical Views)
-       ├──► (Power BI Executive Dashboard)
-       └──► (Interactive Client-Side HTML/JS Web Platform)
+       └──► (Power BI Executive Dashboard)
 
 ---
 
@@ -34,27 +43,28 @@ An enterprise-grade Data Engineering and Analytics solution transforming 9,800 r
 
 ## 📂 Repository Structure
 
-OnlineStoreDB-Analytics/
+Sales-Dashboard-Connected-to-SQL/
 │
-├── 01_Python_Processing/         # Cleaning scripts & CSV generation logic
-│   ├── train_cleaned.csv
-│   └── onlinestore_data.py
+├── 01_Python_Cleaning/
+│   ├── mini_project.py
+│   ├── train.csv
+│   └── train_cleaned.csv
 │
-├── 02_SQL_Database/              # DDL, DML, Bulk Insert, & Analytical Views
-│   ├── 01_create_database.sql
-│   ├── 02_create_tables.sql
-│   ├── 03_import_customers_products.sql
-│   ├── 04_import_orders_details.sql
-│   ├── 05_create_views.sql
-│   └── 06_analytical_queries.sql
+├── 02_python_processing/
+│   ├── customers.csv
+│   ├── onlinestore_data.py
+│   ├── order_details.csv
+│   └── orders.csv
+│   ├── products.csv
+│   └── train_cleaned.csv
 │
-├── 03_PowerBI_Dashboard/         # Power BI report files & visual assets
-│   └── OnlineStore_Sales_Dashboard.pbix
-│
-├── 04_Interactive_Web_App/       # Client-side web portal & interactive analytics
-│   ├── index.html
-│   ├── styles.css
-│   └── app.js
+├── 03_sql_database/
+│   ├── 1-create_database.sql
+│   ├── 2-create_tables.sql
+│   ├── 3-import_customers_products.sql
+│   ├── 4-import_orders_details.sql
+│   ├── 5-create_views.sql
+│   └── 6-analytical_queries.sql
 │
 └── README.md
 
@@ -62,6 +72,6 @@ OnlineStoreDB-Analytics/
 
 ## ⚙️ How to Run & Reproduce
 
-1. **Python Data Pipeline:** Run `onlinestore_data.py` to process `train_cleaned.csv` into 4 relational CSV files (customers, products, orders, order_details).
-2. **Database Setup:** Execute scripts 01 through 05 in order within SQL Server Management Studio (SSMS).
-3. **Power BI Integration:** Open `OnlineStore_Sales_Dashboard.pbix` and connect to the local OnlineStoreDB server instance.
+1. **Python Cleaning & Processing:** Run scripts in `01_Python_Cleaning` and `02_python_processing` to generate relational CSVs.
+2. **Database Setup:** Execute SQL scripts `1` through `6` sequentially in **SQL Server Management Studio (SSMS)**.
+3. **Power BI Integration:** Connect Power BI to the `OnlineStoreDB` server instance using the prepared tables and views.
