@@ -75,3 +75,5 @@ Sales-Dashboard-Connected-to-SQL/
 1. **Python Cleaning & Processing:** Run scripts in `01_Python_Cleaning` and `02_python_processing` to generate relational CSVs.
 2. **Database Setup:** Execute SQL scripts `1` through `6` sequentially in **SQL Server Management Studio (SSMS)**.
 3. **Power BI Integration:** Connect Power BI to the `OnlineStoreDB` server instance using the prepared tables and views.
+   🌐 **Live AI Data Assistant (Interactive Web App):** 
+[👉 اضغط هنا لتشغيل الشات التفاعلي أونلاين](https://hosammahmoh-star.github.io/DEPI-ONL5-Team-1/mini%20project/Sales-Dashboard-Connected-to-SQL/05_Interactive_Web_App/)
