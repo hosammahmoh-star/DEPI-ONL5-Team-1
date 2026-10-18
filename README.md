@@ -1,42 +1,67 @@
-# ITC_ONL5_DAT3_G1_group-_1
-## OnlineStoreDB SQL SERVER
+# ITC_ONL5_DAT3_G1_group 1
+# 🛒 OnlineStoreDB - End-to-End Retail Sales Data Engineering & BI Analytics
 
-SQL Server database built from a cleaned Superstore-style sales file (`train_cleaned.csv`, 9,800 rows).
-The flat file is split into 4 related tables.
+An enterprise-grade Data Engineering and Analytics solution transforming 9,800 raw retail sales records into a highly normalized SQL Server Relational Database, enriched with custom SQL Views, and visualized via an interactive Power BI Dashboard & Client-Side Web Application.
 
-## Tables
+---
 
-| Table | Primary Key | Foreign Keys | Rows |
-|---|---|---|---|
-| Customers | CustomerID | - | 793 |
-| Products | ProductID | - | 1,861 |
-| Orders | OrderID | CustomerID -> Customers | 4,922 |
-| OrderDetails | RowID | OrderID -> Orders, ProductID -> Products | 9,800 |
+## 📐 Architecture & Pipeline Overview
 
-## Design decisions
+- [ Raw Data (train.csv) ] 
+       │
+       ▼ (Python / Pandas Automation & Normalization)
+- [ 4 Cleaned CSV Files ] 
+       │
+       ▼ (SQL Server 2025 / SSMS Architecture & Constraints)
+- [ OnlineStoreDB Relational Database ]
+       │
+       ├──► (SQL Analytics & Analytical Views)
+       ├──► (Power BI Executive Dashboard)
+       └──► (Interactive Client-Side HTML/JS Web Platform)
 
-- Shipping address (City, State, PostalCode, Region) lives in `Orders`, because a customer appears with up to 15 different cities.
-- `OrderDetails` uses `RowID` as primary key, because the same product appears twice in the same order in 8 rows.
-- 32 ProductIDs had two different names; the most frequent name was kept for each.
-- `PostalCode` allows NULL (6 orders have no postal code).
+---
 
-## Scripts (`02_SQL_Scripts/`)
+## 📊 Key Business & Financial Insights (EDA Highlights)
 
-Run them in this order:
+- **Total Revenue:** $2,261,536.78
+- **Total Orders Processed:** 4,922 Orders
+- **Total Customer Base:** 793 Unique Customers
+- **Total Product Portfolio:** 1,861 Products
+- **Category Sales Leader:** Technology ($827,455.87 ~ 36.58%), followed by Furniture ($728,658.58 ~ 32.22%) and Office Supplies ($705,422.33 ~ 31.20%).
+- **Top Regional Market:** West Region ($710,219.68 ~ 31.40%), followed by East Region ($669,518.73 ~ 29.60%).
 
-1. `01_create_database.sql` creates the `OnlineStoreDB` database.
-2. `02_create_tables.sql` creates the 4 tables with PK/FK constraints.
-3. `onlinestore_data.py` splits `train_cleaned.csv` into 4 CSV files (needs `pandas`).
-4. `03_import_customers_products.sql` loads Customers and Products.
-5. `04_import_orders_details.sql` loads Orders and OrderDetails.
+---
 
-Before step 4, change the path `C:\OnlineStore\data\` inside the import scripts to the folder that holds the CSV files.
+## 📂 Repository Structure
 
-## Verification
+OnlineStoreDB-Analytics/
+│
+├── 01_Python_Processing/         # Cleaning scripts & CSV generation logic
+│   ├── train_cleaned.csv
+│   └── onlinestore_data.py
+│
+├── 02_SQL_Database/              # DDL, DML, Bulk Insert, & Analytical Views
+│   ├── 01_create_database.sql
+│   ├── 02_create_tables.sql
+│   ├── 03_import_customers_products.sql
+│   ├── 04_import_orders_details.sql
+│   ├── 05_create_views.sql
+│   └── 06_analytical_queries.sql
+│
+├── 03_PowerBI_Dashboard/         # Power BI report files & visual assets
+│   └── OnlineStore_Sales_Dashboard.pbix
+│
+├── 04_Interactive_Web_App/       # Client-side web portal & interactive analytics
+│   ├── index.html
+│   ├── styles.css
+│   └── app.js
+│
+└── README.md
 
-After importing, the row counts should be 793 / 1861 / 4922 / 9800, and a LEFT JOIN check for orphan rows
-(orders without a customer, order lines without a product) should return 0.
+---
 
-## Tools
+## ⚙️ How to Run & Reproduce
 
-SQL Server 2025, SSMS 22, Python with pandas.
+1. **Python Data Pipeline:** Run `onlinestore_data.py` to process `train_cleaned.csv` into 4 relational CSV files (customers, products, orders, order_details).
+2. **Database Setup:** Execute scripts 01 through 05 in order within SQL Server Management Studio (SSMS).
+3. **Power BI Integration:** Open `OnlineStore_Sales_Dashboard.pbix` and connect to the local OnlineStoreDB server instance.
