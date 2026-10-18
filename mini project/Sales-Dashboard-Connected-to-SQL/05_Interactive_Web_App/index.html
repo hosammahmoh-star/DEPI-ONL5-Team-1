@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مساعد تحليل البيانات الذكي - OnlineStoreDB</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- SheetJS لقراءة ملفات الـ Excel و CSV -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+        body { font-family: 'Cairo', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col items-center p-4">
+
+    <!-- Container -->
+    <div class="w-full max-w-4xl bg-slate-800 rounded-2xl shadow-2xl overflow-hidden border border-slate-700 flex flex-col h-[90vh]">
+        
+        <!-- Header -->
+        <header class="bg-slate-900 p-4 border-b border-slate-700 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-emerald-400 flex items-center gap-2">
+                🤖 مساعد تحليل البيانات الذكي (Gemini AI)
+            </h1>
+            <span id="status-badge" class="px-3 py-1 bg-amber-500/20 text-amber-300 text-xs rounded-full border border-amber-500/30">
+                جاري البحث عن ملف البيانات على GitHub...
+            </span>
+        </header>
+
+        <!-- Configuration Panel -->
+        <div class="bg-slate-800/80 p-4 border-b border-slate-700 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-semibold mb-1 text-slate-300">مفتاح الـ Gemini API Key:</label>
+                <input type="password" id="api-key" placeholder="أدخل المفتاح هنا (API Key)" 
+                    class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold mb-1 text-slate-300">اختر ملف بيانات آخر (اختياري - CSV أو Excel):</label>
+                <input type="file" id="file-input" accept=".csv, .xlsx, .xls" 
+                    class="w-full bg-slate-900 border border-slate-600 rounded-lg px-2 py-1.5 text-sm text-slate-400 file:ml-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-emerald-600 file:text-white hover:file:bg-emerald-700 cursor-pointer">
+            </div>
+        </div>
+
+        <!-- Chat / Results Area -->
+        <div id="chat-container" class="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-900/50">
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 max-w-[85%]">
+                <p class="text-sm text-emerald-300 font-semibold mb-1">مرحباً بك يا حسام!</p>
+                <p class="text-sm text-slate-300">للبدء: أدخل مفتاح الـ API، وسيقوم النظام بتحليل الملف تلقائياً. يمكنك طرح أي سؤال حول المبيعات والمنتجات والعملاء وسيجيبك الذكاء الاصطناعي فوراً.</p>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-4 bg-slate-800 border-t border-slate-700 flex gap-2">
+            <input type="text" id="user-input" placeholder="اكتب سؤالك هنا (مثلاً: كم عدد الصفوف؟ ما هي أصل المبيعات؟)..." 
+                class="flex-1 bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500 disabled:opacity-50" disabled>
+            <button id="send-btn" onclick="askGemini()" 
+                class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-3 rounded-xl transition-all disabled:opacity-50 cursor-pointer" disabled>
+                إرسال 🚀
+            </button>
+        </div>
+
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        let globalDataSummary = "";
+        let globalColumns = "";
+        let totalRowCount = 0;
+
+        // تحميل الملف تلقائياً من جيثب عند فتح الصفحة
+        window.addEventListener('DOMContentLoaded', () => {
+            // نحاول قراءة الملف من المجلدات الموجودة في المستودع
+            const defaultPaths = [
+                '../01_Python_Cleaning/train_cleaned.csv',
+                '../02_python_processing/train_cleaned.csv',
+                'train_cleaned.csv'
+            ];
+
+            tryFetchDefaultData(defaultPaths, 0);
+        });
+
+        function tryFetchDefaultData(paths, index) {
+            if (index >= paths.length) {
+                const badge = document.getElementById('status-badge');
+                badge.textContent = "في انتظار رفع الملف يدوياً 📁";
+                badge.className = "px-3 py-1 bg-amber-500/20 text-amber-300 text-xs rounded-full border border-amber-500/30";
+                return;
+            }
+
+            fetch(paths[index])
+                .then(response => {
+                    if (!response.ok) throw new Error("File not found");
+                    return response.text();
+                })
+                .then(csvText => {
+                    processData(csvText);
+                    const badge = document.getElementById('status-badge');
+                    badge.textContent = `تم تحميل بيانات جيثب تلقائياً (${totalRowCount.toLocaleString()} صف) ✅`;
+                    badge.className = "px-3 py-1 bg-emerald-500/20 text-emerald-300 text-xs rounded-full border border-emerald-500/30";
+                })
+                .catch(() => {
+                    tryFetchDefaultData(paths, index + 1);
+                });
+        }
+
+        // قراءة الملف اليدوي (CSV أو Excel)
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+
+            if (file.name.endsWith('.csv')) {
+                reader.onload = function(event) {
+                    processData(event.target.result);
+                };
+                reader.readAsText(file);
+            } else {
+                reader.onload = function(e) {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const csvData = XLSX.utils.sheet_to_csv(worksheet);
+                    processData(csvData);
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        });
+
+        function processData(csvText) {
+            const lines = csvText.trim().split('\n');
+            globalColumns = lines[0];
+            totalRowCount = lines.length - 1;
+            
+            // احتفاظ بالنص كاملاً للتحليل
+            globalDataSummary = csvText;
+
+            const badge = document.getElementById('status-badge');
+            badge.textContent = `تم تحميل البيانات بالكامل (${totalRowCount.toLocaleString()} صف) ✅`;
+            badge.className = "px-3 py-1 bg-emerald-500/20 text-emerald-300 text-xs rounded-full border border-emerald-500/30";
+
+            document.getElementById('user-input').disabled = false;
+            document.getElementById('send-btn').disabled = false;
+
+            appendMessage("النظام", `تم قراءة الملف بنجاح! إجمالي عدد الصفوف في البيانات هو: ${totalRowCount.toLocaleString()} صف. يمكنك طرح أسئلتك الآن.`, "emerald");
+        }
+
+        async function askGemini() {
+            const apiKey = document.getElementById('api-key').value.trim();
+            const userInput = document.getElementById('user-input').value.trim();
+
+            if (!apiKey) {
+                alert("الرجاء إدخال مفتاح الـ API Key أولاً!");
+                return;
+            }
+            if (!userInput) return;
+
+            appendMessage("أنت", userInput, "blue");
+            document.getElementById('user-input').value = "";
+
+            const loadingId = appendMessage("الذكاء الاصطناعي", "جاري التحليل والبحث في كامل البيانات...", "amber", true);
+
+            // إرسال عينة البيانات مع العدد الإجمالي لمنع تجاوز الحدود النصية للـ API
+            const lines = globalDataSummary.trim().split('\n');
+            const sampleData = lines.slice(0, 500).join('\n');
+
+            const prompt = `
+أنت خبير تحليل بيانات محترف ومساعد ذكي للتحليل.
+ملاحظة هامة جداً: إجمالي عدد الصفوف الكلي الحقيقي الموجود في ملف البيانات هو: [ ${totalRowCount} صف ].
+أسماء أعمدة الجدول المتاحة: [ ${globalColumns} ]
+
+إليك عينة تمثيلية واسعة من أصل الـ ${totalRowCount} صف الخاصة بالبيانات:
+${sampleData}
+
+بناءً على تفاصيل ومعطيات البيانات وإجمالي الصفوف (${totalRowCount} صف)، أجِب عن سؤال المستخدم بدقة واحترافية وباللغة العربية:
+${userInput}
+            `;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }]
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error?.message || `خطأ في الاتصال (Code: ${response.status})`);
+                }
+
+                const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "عذراً، لم أتمكن من الحصول على رد.";
+                updateMessage(loadingId, reply);
+            } catch (error) {
+                updateMessage(loadingId, "عذراً، حدث خطأ: " + error.message);
+            }
+        }
+
+        function appendMessage(sender, text, color, isLoading = false) {
+            const chatContainer = document.getElementById('chat-container');
+            const msgId = 'msg-' + Date.now();
+            const align = sender === 'أنت' ? 'mr-auto bg-slate-700' : 'ml-auto bg-slate-800 border border-slate-700';
+            
+            const html = `
+                <div id="${msgId}" class="p-3 rounded-xl max-w-[85%] ${align} mb-3 shadow">
+                    <p class="text-xs font-bold text-${color}-400 mb-1">${sender}</p>
+                    <p class="text-sm text-slate-200 whitespace-pre-wrap">${text}</p>
+                </div>
+            `;
+            chatContainer.insertAdjacentHTML('beforeend', html);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            return msgId;
+        }
+
+        function updateMessage(msgId, newText) {
+            const msgElement = document.getElementById(msgId);
+            if (msgElement) {
+                msgElement.querySelector('p.text-slate-200').textContent = newText;
+            }
+            const chatContainer = document.getElementById('chat-container');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+    </script>
+</body>
+</html>
