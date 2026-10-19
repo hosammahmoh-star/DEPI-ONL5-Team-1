@@ -9,16 +9,16 @@ An enterprise-grade Data Engineering and Analytics solution transforming retail 
 
 ## 📊 Power BI Dashboard Screenshots
 
-1. **Executive Sales Overview:**  
+1. 
    ![Executive Sales](mini%20project/Sales-Dashboard-Connected-to-SQL/04_PowerBI_Dashboard/Dashboard_Screenshots/Executive%20overview.png)
 
-2. **Customer Insights:**  
+2. 
    ![Customer Insights](mini%20project/Sales-Dashboard-Connected-to-SQL/04_PowerBI_Dashboard/Dashboard_Screenshots/Customer%20Insight.png)
 
-3. **Product Performance:**  
+3. 
    ![Product Performance](mini%20project/Sales-Dashboard-Connected-to-SQL/04_PowerBI_Dashboard/Dashboard_Screenshots/Product%20Performance.png)
 
-4. **Future Insights & Forecasting:**  
+4.
    ![Future Insights](mini%20project/Sales-Dashboard-Connected-to-SQL/04_PowerBI_Dashboard/Dashboard_Screenshots/Home.jpeg)
    
 ---
