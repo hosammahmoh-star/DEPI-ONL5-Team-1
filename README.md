@@ -3,7 +3,7 @@
 An enterprise-grade Data Engineering and Analytics solution transforming retail sales records into a normalized SQL Server Relational Database, visualized via an interactive Power BI Dashboard, and integrated with an AI Data Assistant web app.
 
 🌐 **Live Interactive Report & Dashboard:**  
-[👉 Open Interactive Analytics Web App](https://hosammahmoh-star.github.io/DEPI-ONL5-Team-1/mini%20project/Sales-Dashboard-Connected-to-SQL/05_Interactive_Web_App/)
+[👉 Open Interactive Analytics Web App]([https://hosammahmoh-star.github.io/DEPI-ONL5-Team-1/mini%20project/Sales-Dashboard-Connected-to-SQL/05_Interactive_Web_App/](https://hosammahmoh-star.github.io/DEPI-ONL5-Team-1/mini%20project/Sales-Dashboard-Connected-to-SQL/05_Interactive_Web_App/Online%20Store.html))
 
 ---
 
