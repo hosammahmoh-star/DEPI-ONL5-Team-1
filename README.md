@@ -1,79 +1,44 @@
-# ITC_ONL5_DAT3_G1_group 1
-# 🛒 OnlineStoreDB - End-to-End Retail Sales Data Engineering & BI Analytics
+# 🛒 OnlineStoreDB - End-to-End Retail Sales Data Engineering & Analytics
 
-An enterprise-grade Data Engineering and Analytics solution transforming 9,800 raw retail sales records into a highly normalized SQL Server Relational Database, enriched with custom SQL Views, and visualized via an interactive Power BI Dashboard.
+An enterprise-grade Data Engineering and Analytics solution transforming retail sales records into a normalized SQL Server Relational Database, visualized via an interactive Power BI Dashboard, and integrated with an AI Data Assistant web app.
 
----
-
-## 👥 Team Workflows & Division of Labor
-
-- **Data Cleaning:** Initial inspection, missing values treatment, date parsing, and standardizing data formats.
-- **Python Data Engineering & Normalization:** Automated script (`onlinestore_data.py`) to split the flat dataset into 4 relational entities (Customers, Products, Orders, OrderDetails).
-- **SQL Database Architecture & DDL:** Designing relational tables, primary/foreign keys, and Bulk Insert pipelines.
-- **SQL Analytics & Views:** Building analytical queries and reusable SQL Views (`vw_FullOrderReport`, `vw_CustomerSales`, `vw_ProductPerformance`) to streamline reporting.
-- **DAX & Power BI Dashboard:** Developing financial/sales measures and designing an executive interactive visual dashboard.
+🌐 **Live Interactive Report & Dashboard:**  
+[👉 Open Interactive Analytics Web App](https://hosammahmoh-star.github.io/DEPI-ONL5-Team-1/mini%20project/Sales-Dashboard-Connected-to-SQL/05_Interactive_Web_App/)
 
 ---
 
-## 📐 Architecture & Pipeline Overview
+## 📊 Power BI Dashboard Screenshots
 
-- [ Raw Data (train.csv) ] 
-       │
-       ▼ (Python / Pandas Automation & Normalization)
-- [ Cleaned & Relational CSV Files ] 
-       │
-       ▼ (SQL Server / SSMS Architecture & Constraints)
-- [ OnlineStoreDB Relational Database ]
-       │
-       ├──► (SQL Analytics & Analytical Views)
-       └──► (Power BI Executive Dashboard)
+The project features a professional 4-page Power BI Dashboard:
 
----
+1. **Executive Sales Overview:**  
+   ![Executive Sales](04_PowerBI_Dashboard/Dashboard_Screenshots/executive_sales.png)
 
-## 📊 Key Business & Financial Insights (EDA Highlights)
+2. **Customer Insights:**  
+   ![Customer Insights](04_PowerBI_Dashboard/Dashboard_Screenshots/customer_insights.png)
 
-- **Total Revenue:** $2,261,536.78
-- **Total Orders Processed:** 4,922 Orders
-- **Total Customer Base:** 793 Unique Customers
-- **Total Product Portfolio:** 1,861 Products
-- **Category Sales Leader:** Technology ($827,455.87 ~ 36.58%), followed by Furniture ($728,658.58 ~ 32.22%) and Office Supplies ($705,422.33 ~ 31.20%).
-- **Top Regional Market:** West Region ($710,219.68 ~ 31.40%), followed by East Region ($669,518.73 ~ 29.60%).
+3. **Product Performance:**  
+   ![Product Performance](04_PowerBI_Dashboard/Dashboard_Screenshots/product_performance.png)
+
+4. **Future Insights & Forecasting:**  
+   ![Future Insights](04_PowerBI_Dashboard/Dashboard_Screenshots/future_insights.png)
 
 ---
 
-## 📂 Repository Structure
+## 💡 Key Business Metrics & Findings
 
-Sales-Dashboard-Connected-to-SQL/
-│
-├── 01_Python_Cleaning/
-│   ├── mini_project.py
-│   ├── train.csv
-│   └── train_cleaned.csv
-│
-├── 02_python_processing/
-│   ├── customers.csv
-│   ├── onlinestore_data.py
-│   ├── order_details.csv
-│   └── orders.csv
-│   ├── products.csv
-│   └── train_cleaned.csv
-│
-├── 03_sql_database/
-│   ├── 1-create_database.sql
-│   ├── 2-create_tables.sql
-│   ├── 3-import_customers_products.sql
-│   ├── 4-import_orders_details.sql
-│   ├── 5-create_views.sql
-│   └── 6-analytical_queries.sql
-│
-└── README.md
+* **Total Revenue:** $2,261,536.78 across 4,922 orders and 793 customers[cite: 11].
+* **Average Order Value (AOV):** $459.48 (indicating high-ticket basket items)[cite: 11].
+* **Yearly Growth:** 46.90% cumulative growth rate[cite: 11].
+* **Seasonality:** Major sales surge in Q4 (November & December)[cite: 11].
+* **Top Categories:** Technology leads at 36.59%, followed by Furniture (32.22%) and Office Supplies (31.19%)[cite: 11].
 
 ---
 
-## ⚙️ How to Run & Reproduce
+## 🛠️ Repository Structure
 
-1. **Python Cleaning & Processing:** Run scripts in `01_Python_Cleaning` and `02_python_processing` to generate relational CSVs.
-2. **Database Setup:** Execute SQL scripts `1` through `6` sequentially in **SQL Server Management Studio (SSMS)**.
-3. **Power BI Integration:** Connect Power BI to the `OnlineStoreDB` server instance using the prepared tables and views.
-   🌐 **Live AI Data Assistant (Interactive Web App):** 
-[👉 اضغط هنا لتشغيل الشات التفاعلي أونلاين](https://hosammahmoh-star.github.io/DEPI-ONL5-Team-1/mini%20project/Sales-Dashboard-Connected-to-SQL/05_Interactive_Web_App/)
+* `01_Python_Cleaning/` - Raw data cleaning scripts & datasets.
+* `02_python_processing/` - Normalization into 4 relational entities (`Customers`, `Orders`, `OrderDetails`, `Products`).
+* `03_sql_database/` - Relational DDL, Foreign Keys & Analytical Views.
+* `04_PowerBI_Dashboard/` - Power BI `.pbix` file and screenshot assets.
+* `05_Interactive_Web_App/` - Bilingual interactive HTML portfolio & AI assistant.
