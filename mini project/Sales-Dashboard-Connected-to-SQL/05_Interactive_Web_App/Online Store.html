@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>OnlineStoreDB - Ultimate Analytics Dashboard & Portfolio</title>
+    <!-- Chart.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --bg: #0e1524;
+            --card: #17223a;
+            --tx: #e6ebf7;
+            --mu: #93a1c2;
+            --nav: #0a1020;
+            --ac: #4318ff;
+            --bd: #2a3856;
+            --hv: #1d2b48;
+        }
+        :root[data-theme="light"] {
+            --bg: #f4f7fe;
+            --card: #ffffff;
+            --tx: #2b3674;
+            --mu: #7090b0;
+            --nav: #1f3864;
+            --ac: #4318ff;
+            --bd: #e9ecef;
+            --hv: #f4f7fc;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--bg); color: var(--tx); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; transition: background 0.3s, color 0.3s; }
+        .app { display: grid; grid-template-columns: 240px minmax(0, 1fr); min-height: 100vh; }
+        
+        /* Sidebar */
+        nav { background: var(--nav); color: #fff; padding: 20px 15px; display: flex; flex-direction: column; gap: 6px; box-shadow: 2px 0 15px rgba(0,0,0,0.1); position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+        nav h1 { font-size: 18px; margin: 0 5px 20px; color: #fff; font-weight: 800; text-align: center; }
+        .nb { display: block; width: 100%; text-align: right; background: none; border: 0; color: #c9d4ee; padding: 12px 14px; border-radius: 10px; font: inherit; cursor: pointer; transition: all 0.2s; font-weight: 600; }
+        [dir="ltr"] .nb { text-align: left; }
+        .nb:hover { background: rgba(255,255,255,0.1); }
+        .nb.on { background: var(--ac); color: #fff; }
+
+        /* Main */
+        main { padding: 20px 25px; min-width: 0; overflow-y: auto; }
+        header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 20px; background: var(--card); padding: 18px 24px; border-radius: 16px; border: 1px solid var(--bd); }
+        header h2 { margin: 0; font-size: 22px; color: var(--tx); }
+        .fb { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+        
+        select, input, .btn { font: inherit; color: var(--tx); background: var(--card); border: 1px solid var(--bd); border-radius: 10px; padding: 8px 12px; outline: none; transition: 0.2s; }
+        .btn { cursor: pointer; font-weight: 600; }
+        .btn:hover { background: var(--hv); }
+        .btn.p { background: var(--ac); border-color: var(--ac); color: #fff; }
+
+        /* Comprehensive KPI Grid */
+        .kp { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .k { background: var(--card); border: 1px solid var(--bd); border-radius: 14px; padding: 16px; display: flex; gap: 14px; align-items: center; box-shadow: 0px 10px 30px rgba(0,0,0,0.05); }
+        .k i { font-style: normal; font-size: 24px; background: var(--hv); border-radius: 10px; width: 48px; height: 48px; display: grid; place-items: center; }
+        .k small { display: block; color: var(--mu); font-size: 12px; margin-bottom: 4px; }
+        .k b { font-size: 18px; color: var(--tx); }
+
+        /* Charts & Cards Grid */
+        .g { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 18px; margin-bottom: 18px; }
+        @media(min-width: 1100px) { .w2 { grid-column: span 2; } }
+        .card { background: var(--card); border: 1px solid var(--bd); border-radius: 14px; padding: 18px; box-shadow: 0px 10px 30px rgba(0,0,0,0.05); }
+        .card h3 { margin: 0 0 12px; font-size: 15px; color: var(--tx); display: flex; justify-content: space-between; align-items: center; }
+        .card h3 small { color: var(--mu); font-weight: 400; font-size: 12px; }
+        .cv { position: relative; height: 300px; width: 100%; }
+
+        /* Analysis & Pipeline */
+        .analysis-section, .pipeline-grid, .rec-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+        .analysis-card, .pipeline-card, .rec-item { background: var(--card); border: 1px solid var(--bd); padding: 22px; border-radius: 14px; border-right: 4px solid var(--ac); box-shadow: 0px 10px 30px rgba(0,0,0,0.05); }
+        [dir="ltr"] .analysis-card, [dir="ltr"] .pipeline-card, [dir="ltr"] .rec-item { border-right: none; border-left: 4px solid var(--ac); }
+        .analysis-card h3, .pipeline-card h3, .rec-item h4 { font-size: 16px; color: var(--ac); margin-bottom: 10px; }
+        .analysis-card ul { padding-inline-start: 20px; color: var(--mu); font-size: 13px; line-height: 1.7; }
+        .analysis-card li { margin-bottom: 6px; }
+        .pipeline-card p, .rec-item p { font-size: 13px; color: var(--mu); line-height: 1.6; margin-bottom: 8px; }
+        .pipeline-card code { background: var(--hv); padding: 2px 6px; border-radius: 4px; font-size: 12px; color: #e5566d; }
+
+        @media(max-width: 800px) {
+            .app { grid-template-columns: 1fr; }
+            nav { flex-direction: row; overflow-x: auto; padding: 10px; align-items: center; height: auto; position: static; }
+            nav h1 { display: none; }
+            .nb { white-space: nowrap; width: auto; }
+            main { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app">
+    <!-- Sidebar Navigation -->
+    <nav>
+        <h1 id="brandTitle">🛒 OnlineStoreDB</h1>
+        <button class="nb on" data-p="dash" id="navDash">📊 لوحة المؤشرات الشاملة</button>
+        <button class="nb" data-p="analysis" id="navAna">📈 التحليلات والمشاكل والحلول</button>
+        <button class="nb" data-p="pipeline" id="navPipe">⚙️ مراحل العمل (Pipeline)</button>
+        <button class="nb" data-p="ai" id="navAi">🤖 المساعد الذكي (AI App)</button>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <header>
+            <div>
+                <h2 id="pageTitleHeading">لوحة التحليل المالي والتنفيذي الشاملة</h2>
+                <small id="subHeaderInfo">جاري تحميل البيانات...</small>
+            </div>
+            <div class="fb" id="filterBar"></div>
+        </header>
+
+        <div id="dynamicBody"></div>
+    </main>
+</div>
+
+<!-- JavaScript Logic & Localization -->
+<script>
+const LANG = {
+    ar: {
+        brand: "🛒 OnlineStoreDB",
+        dash: "📊 لوحة المؤشرات الشاملة",
+        ana: "📈 التحليلات والمشاكل والحلول",
+        pipe: "⚙️ مراحل العمل (Pipeline)",
+        ai: "🤖 المساعد الذكي (AI App)",
+        themeBtn: "◐ المظهر",
+        langBtn: "🌐 English",
+        kpis: { s: "إجمالي المبيعات", n: "إجمالي الطلبات", c: "إجمالي العملاء", aov: "متوسط قيمة الطلب", yoy: "النمو السنوي YoY", rpc: "العائد / عميل", dd: "متوسط أيام التوصيل", p: "إجمالي المنتجات", ct: "عدد الفئات" },
+        charts: {
+            trend: "الاتجاه الزمني للمبيعات (متحرك 3 أشهر)",
+            cat: "المبيعات حسب الفئة الرئيسية (Categories)",
+            subcat: "المبيعات حسب الفئات الفرعية (Sub-Categories)",
+            region: "التوزيع الجغرافي للمبيعات (Regions)",
+            state: "أداء الولايات الأعلى مبيعات (Top States)",
+            segment: "توزيع شرائح العملاء (Customer Segments)",
+            ship: "الطلبات وكفاءة الشحن حسب الوسيلة",
+            forecast: "التنبؤ المستقبلي للمبيعات (Forecasting)"
+        },
+        sections: [
+            {
+                title: "1️⃣ التحليل المالي والتنفيذي (Executive Sales Overview)",
+                items: [
+                    "<strong>إجمالي المبيعات (Total Revenue):</strong> بلغ $2,261,536.78 من 4,922 طلب لـ 793 عميل.",
+                    "<strong>متوسط قيمة الطلب (AOV):</strong> $459.48، مما يعكس احتواء السلة على منتجات مرتفعة القيمة (High-ticket items).",
+                    "<strong>النمو السنوي (Yearly Growth):</strong> نسبة نمو تراكمي ممتازة بلغت 46.90%.",
+                    "<strong>الموسمية:</strong> تصاعد سنوي مستمر مع ذروة قوية (Seasonality Peak) في الربع الأخير (نوفمبر وديسمبر)."
+                ]
+            },
+            {
+                title: "2️⃣ تحليل سلوك العملاء وشحن الطلبات (Customer Insights)",
+                items: [
+                    "<strong>العائد لكل عميل (Revenue/Customer):</strong> يصل إلى $2,851.87، مما يدل على ولاء مرتفع.",
+                    "<strong>شرائح العملاء:</strong> تسيطر شريحة الأفراد (Consumer) بأكثر من 1.1M$ تليها الشركات (Corporate).",
+                    "<strong>كفاءة الشحن:</strong> متوسط أيام التوصيل 3.96 يوم؛ 59.29% يعتمدون على الشحن القياسي رغم استغراقه وقتاً أطول."
+                ]
+            },
+            {
+                title: "3️⃣ تحليل أداء المنتجات والفئات (Product Performance)",
+                items: [
+                    "<strong>الفئات الرئيسية:</strong> تتصدر التكنولوجيا (36.59%)، تليها الأثاث (32.22%)، ثم أدوات المكاتب (31.19%).",
+                    "<strong>قاعدة 80/20:</strong> التركيز الأكبر للأرباح يأتي من عدد محدود من الهواتف الذكية والكراسي المكتبية."
+                ]
+            },
+            {
+                title: "4️⃣ التحديات التشغيلية والحلول المقترحة (Problems & Solutions)",
+                items: [
+                    "<strong>مشكلة ضغط المخزون بـ Q4:</strong> حدوث تكدس وتأخير. <em>الحل:</em> الاستعداد المبكر وضخ المخزون في سبتمبر وأكتوبر.",
+                    "<strong>ضعف المبيعات بالمنطقة الجنوبية (South):</strong> إيرادات أقل مقارنة بالغرب والشرق. <em>الحل:</em> حملات ترويجية B2B مخصصة.",
+                    "<strong>الاعتماد المفرط على الشحن القياسي:</strong> إبطاء الدورة التشغيلية. <em>الحل:</em> تقديم حوافز للتحول للشحن السريع."
+                ]
+            }
+        ],
+        pipelineSteps: [
+            { title: "01. تنظيف البيانات (Data Cleaning)", desc: "استخدام مكتبة Pandas في بايثون لمعالجة القيم المفقودة والتكرارات وتوحيد التواريخ.", file: "01_Python_Cleaning/" },
+            { title: "02. نمذجة قاعدة البيانات (SQL Database)", desc: "تصميم نموذج النجوم (Star Schema) وتقسيم البيانات إلى 4 جداول (Customers, Orders, OrderDetails, Products) مع قيود المفاتيح.", file: "03_sql_database/" },
+            { title: "03. لوحات المؤشرات (Power BI)", desc: "تطوير تقرير تفاعلي من 4 صفحات يشمل Executive Overview و Customer Insights و Product Performance مع معادلات DAX متقدمة.", file: "OnlineStore_measures.pbix" },
+            { title: "04. تطبيق الويب الذكي (AI Web App)", desc: "تطوير تطبيق ويب مدمج مع Google Gemini API للإجابة الفورية عن استفسارات المبيعات بدقة.", file: "05_Interactive_Web_App/" }
+        ]
+    },
+    en: {
+        brand: "🛒 OnlineStoreDB",
+        dash: "📊 Comprehensive Dashboard",
+        ana: "📈 Analysis, Issues & Solutions",
+        pipe: "⚙️ Project Pipeline",
+        ai: "🤖 AI Assistant App",
+        themeBtn: "◐ Theme",
+        langBtn: "🌐 العربية",
+        kpis: { s: "Total Sales", n: "Total Orders", c: "Total Customers", aov: "Avg Order Value", yoy: "YoY Growth", rpc: "Revenue / Customer", dd: "Avg Delivery Days", p: "Total Products", ct: "Categories" },
+        charts: {
+            trend: "Monthly Sales Trend & Moving Average",
+            cat: "Sales by Main Category",
+            subcat: "Sales by Sub-Category",
+            region: "Regional Sales Distribution",
+            state: "Top Performing States",
+            segment: "Customer Segments Distribution",
+            ship: "Orders & Shipping Efficiency",
+            forecast: "Sales Trend & Future Forecast"
+        },
+        sections: [
+            {
+                title: "1️⃣ Executive Sales Overview",
+                items: [
+                    "<strong>Total Revenue:</strong> $2,261,536.78 generated across 4,922 orders and 793 customers.",
+                    "<strong>AOV:</strong> $459.48, indicating high-ticket basket items.",
+                    "<strong>Yearly Growth:</strong> Robust 46.90% cumulative growth rate.",
+                    "<strong>Seasonality:</strong> Clear Q4 spikes (Nov-Dec) aligned with holiday sales."
+                ]
+            },
+            {
+                title: "2️⃣ Customer Insights & Shipping",
+                items: [
+                    "<strong>Revenue per Customer:</strong> $2,851.87 reflecting high retention and loyalty.",
+                    "<strong>Segments:</strong> Consumer segment leads with over $1.1M in sales.",
+                    "<strong>Shipping:</strong> Standard class accounts for 59.29% of orders despite longer delivery days."
+                ]
+            },
+            {
+                title: "3️⃣ Product Performance",
+                items: [
+                    "<strong>Categories:</strong> Technology leads at 36.59%, followed by Furniture (32.22%) and Office Supplies.",
+                    "<strong>Pareto Principle:</strong> Profits concentrate heavily on top-tier electronics and furniture."
+                ]
+            },
+            {
+                title: "4️⃣ Operational Challenges & Solutions",
+                items: [
+                    "<strong>Q4 Inventory Bottlenecks:</strong> Heavy demand spikes. <em>Solution:</em> Stock up early in September/October.",
+                    "<strong>Weak Southern Sales:</strong> Lower performance in South. <em>Solution:</em> Targeted regional B2B promotions.",
+                    "<strong>Standard Shipping Reliance:</strong> Operational strain. <em>Solution:</em> Incentivize expedited shipping tiers."
+                ]
+            }
+        ],
+        pipelineSteps: [
+            { title: "01. Data Cleaning (Python)", desc: "Processed raw records using Pandas to handle missing values and normalize formats.", file: "01_Python_Cleaning/" },
+            { title: "02. SQL Database Architecture", desc: "Designed a Star Schema in SQL Server splitting data into 4 relational tables with foreign keys and views.", file: "03_sql_database/" },
+            { title: "03. Power BI Dashboards", desc: "Built a 4-page interactive report covering Executive Overview, Customer Insights, and Forecasting using advanced DAX.", file: "OnlineStore_measures.pbix" },
+            { title: "04. Interactive AI Web App", desc: "Developed a client-side web assistant powered by Google Gemini API for real-time querying.", file: "05_Interactive_Web_App/" }
+        ]
+    }
+};
+
+let currentLang = 'ar', activePage = 'dash';
+const PAL = ["#4318ff","#16b3a5","#ffb547","#e5566d","#8b6ff0","#3aa6d8","#e07b39","#b5588f"];
+
+let CH = {};
+function ch(id, type, labels, sets, opts = {}) {
+    if (CH[id]) CH[id].destroy();
+    const tc = getComputedStyle(document.documentElement).getPropertyValue('--mu').trim();
+    CH[id] = new Chart(document.getElementById(id), {
+        type, data: { labels, datasets: sets },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { color: tc, boxWidth: 10 } } },
+            scales: type === 'doughnut' || type === 'pie' ? {} : { x: { ticks: { color: tc }, grid: { display: false } }, y: { ticks: { color: tc, callback: v => "$"+Math.round(v).toLocaleString() }, grid: { color: 'rgba(200,200,200,0.1)' } } }
+        }
+    });
+}
+
+function renderUI() {
+    const t = LANG[currentLang];
+    document.documentElement.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+    document.getElementById('brandTitle').textContent = t.brand;
+    document.getElementById('navDash').textContent = t.dash;
+    document.getElementById('navAna').textContent = t.ana;
+    document.getElementById('navPipe').textContent = t.pipe;
+    document.getElementById('navAi').textContent = t.ai;
+
+    const body = document.getElementById('dynamicBody');
+
+    if (activePage === 'dash') {
+        document.getElementById('pageTitleHeading').textContent = currentLang === 'ar' ? 'لوحة المؤشرات والتحليلات الشاملة' : 'Comprehensive Analytics Dashboard';
+        document.getElementById('subHeaderInfo').textContent = currentLang === 'ar' ? '4,922 طلب · $2.26 مليون إجمالي المبيعات · 793 عميل' : '4,922 Orders · $2.26M Total Revenue · 793 Customers';
+        document.getElementById('filterBar').innerHTML = `<button class="btn" onclick="toggleTheme()">${t.themeBtn}</button><button class="btn p" onclick="toggleLang()">${t.langBtn}</button>`;
+
+        body.innerHTML = `
+            <!-- Comprehensive KPI Grid -->
+            <div class="kp">
+                <div class="k"><i>💰</i><div><small>${t.kpis.s}</small><b>$2,261,536</b></div></div>
+                <div class="k"><i>🛒</i><div><small>${t.kpis.n}</small><b>4,922</b></div></div>
+                <div class="k"><i>👥</i><div><small>${t.kpis.c}</small><b>793</b></div></div>
+                <div class="k"><i>🧾</i><div><small>${t.kpis.aov}</small><b>$459.48</b></div></div>
+                <div class="k"><i>📈</i><div><small>${t.kpis.yoy}</small><b>+46.9%</b></div></div>
+                <div class="k"><i>💵</i><div><small>${t.kpis.rpc}</small><b>$2,851</b></div></div>
+                <div class="k"><i>🚚</i><div><small>${t.kpis.dd}</small><b>3.96 d</b></div></div>
+                <div class="k"><i>📦</i><div><small>${t.kpis.p}</small><b>1,861</b></div></div>
+            </div>
+
+            <!-- Charts Grid (All Charts Included) -->
+            <div class="g">
+                <div class="card w2"><h3>${t.charts.trend}</h3><div class="cv"><canvas id="c1"></canvas></div></div>
+                <div class="card"><h3>${t.charts.cat}</h3><div class="cv"><canvas id="c2"></canvas></div></div>
+            </div>
+            <div class="g">
+                <div class="card"><h3>${t.charts.subcat}</h3><div class="cv"><canvas id="c3"></canvas></div></div>
+                <div class="card"><h3>${t.charts.region}</h3><div class="cv"><canvas id="c4"></canvas></div></div>
+            </div>
+            <div class="g">
+                <div class="card"><h3>${t.charts.state}</h3><div class="cv"><canvas id="c5"></canvas></div></div>
+                <div class="card"><h3>${t.charts.segment}</h3><div class="cv"><canvas id="c6"></canvas></div></div>
+            </div>
+            <div class="g">
+                <div class="card"><h3>${t.charts.ship}</h3><div class="cv"><canvas id="c7"></canvas></div></div>
+                <div class="card"><h3>${t.charts.forecast}</h3><div class="cv"><canvas id="c8"></canvas></div></div>
+            </div>
+        `;
+
+        // Render All 8 Charts
+        ch('c1', 'line', ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], [
+            {label:'Actual Sales', data:[35e3,42e3,38e3,52e3,48e3,65e3,58e3,72e3,68e3,95e3,125e3,105e3], borderColor:PAL[0], backgroundColor:PAL[0]+'33', fill:true, tension:0.3},
+            {label:'3-Month Moving Avg', data:[null,null,38e3,44e3,46e3,55e3,57e3,65e3,66e3,78e3,96e3,108e3], borderColor:PAL[2], borderDash:[4,4], tension:0.3}
+        ]);
+        ch('c2', 'doughnut', ['Technology', 'Furniture', 'Office Supplies'], [{data:[836154, 741999, 683383], backgroundColor:PAL}]);
+        ch('c3', 'bar', ['Phones', 'Chairs', 'Storage', 'Tables', 'Binders'], [{label:'Sales', data:[330e3, 310e3, 250e3, 210e3, 190e3], backgroundColor:PAL[1]}]);
+        ch('c4', 'bar', ['West', 'East', 'Central', 'South'], [{label:'Sales', data:[725458, 678781, 501239, 391725], backgroundColor:PAL[3]}]);
+        ch('c5', 'bar', ['California', 'New York', 'Texas', 'Washington', 'Pennsylvania'], [{label:'Sales', data:[450e3, 310e3, 180e3, 150e3, 140e3], backgroundColor:PAL[4]}]);
+        ch('c6', 'pie', ['Consumer', 'Corporate', 'Home Office'], [{data:[1161401, 706146, 393989], backgroundColor:PAL}]);
+        ch('c7', 'bar', ['Standard Class', 'Second Class', 'First Class', 'Same Day'], [{label:'Orders Count', data:[2900, 950, 750, 320], backgroundColor:PAL[5]}]);
+        ch('c8', 'line', ['2015','2016','2017','2018','2019 (Fcst)'], [
+            {label:'Historical & Forecast', data:[484247, 470532, 609205, 733580, 890000], borderColor:PAL[6], backgroundColor:PAL[6]+'22', fill:true, tension:0.3}
+        ]);
+
+    } else if (activePage === 'analysis') {
+        document.getElementById('pageTitleHeading').textContent = t.ana;
+        document.getElementById('subHeaderInfo').textContent = currentLang === 'ar' ? 'التحليلات التفصيلية، المشاكل والحلول الاستراتيجية' : 'Detailed Analysis, Strategic Issues & Solutions';
+        document.getElementById('filterBar').innerHTML = `<button class="btn" onclick="toggleTheme()">${t.themeBtn}</button><button class="btn p" onclick="toggleLang()">${t.langBtn}</button>`;
+
+        body.innerHTML = `
+            <div class="analysis-section">
+                ${t.sections.map(sec => `
+                    <div class="analysis-card">
+                        <h3>${sec.title}</h3>
+                        <ul>${sec.items.map(item => `<li>${item}</li>`).join('')}</ul>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+
+    } else if (activePage === 'pipeline') {
+        document.getElementById('pageTitleHeading').textContent = t.pipe;
+        document.getElementById('subHeaderInfo').textContent = currentLang === 'ar' ? 'معمارية وهندسة المشروع التقنية' : 'Project Architecture & Engineering Pipeline';
+        document.getElementById('filterBar').innerHTML = `<button class="btn" onclick="toggleTheme()">${t.themeBtn}</button><button class="btn p" onclick="toggleLang()">${t.langBtn}</button>`;
+
+        body.innerHTML = `
+            <div class="pipeline-grid">
+                ${t.pipelineSteps.map(step => `
+                    <div class="pipeline-card">
+                        <h3>${step.title}</h3>
+                        <p>${step.desc}</p>
+                        <p>📁 <code>${step.file}</code></p>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+
+    } else if (activePage === 'ai') {
+        document.getElementById('pageTitleHeading').textContent = t.ai;
+        document.getElementById('subHeaderInfo').textContent = currentLang === 'ar' ? 'المساعد الذكي للتحليل' : 'AI Data Analytics Assistant';
+        document.getElementById('filterBar').innerHTML = `<button class="btn" onclick="toggleTheme()">${t.themeBtn}</button><button class="btn p" onclick="toggleLang()">${t.langBtn}</button>`;
+
+        body.innerHTML = `
+            <div class="card" style="text-align:center; padding:50px;">
+                <h3 style="justify-content:center; margin-bottom:15px; font-size:22px;">🤖 Gemini AI Data Assistant</h3>
+                <p style="color:var(--mu); margin-bottom:25px; max-width:600px; margin-inline:auto; line-height:1.6;">${currentLang==='ar'?'تم ربط النظام بـ Google Gemini API مع قيود صارمة (Guardrails) للإجابة حصرياً من بيانات المبيعات الحقيقية.':'Integrated with Google Gemini API with strict guardrails ensuring answers are strictly constrained to retail sales dataset.'}</p>
+                <a href="https://hosammahmoh-star.github.io/DEPI-ONL5-Team-1/mini%20project/Sales-Dashboard-Connected-to-SQL/05_Interactive_Web_App/" target="_blank" class="btn p" style="padding:12px 24px; font-size:15px; text-decoration:none; display:inline-block;">🚀 ${currentLang==='ar'?'فتح التطبيق أونلاين':'Launch Live App'}</a>
+            </div>
+        `;
+    }
+}
+
+function switchPage(p) { activePage = p; document.querySelectorAll('.nb').forEach(b => b.classList.toggle('on', b.dataset.p === p)); renderUI(); }
+function toggleLang() { currentLang = currentLang === 'ar' ? 'en' : 'ar'; renderUI(); }
+function toggleTheme() { const root = document.documentElement; root.setAttribute('data-theme', root.getAttribute('data-theme') === 'light' ? 'dark' : 'light'); renderUI(); }
+
+document.querySelectorAll('.nb').forEach(b => b.onclick = () => switchPage(b.dataset.p));
+renderUI();
+</script>
+</body>
+</html>
