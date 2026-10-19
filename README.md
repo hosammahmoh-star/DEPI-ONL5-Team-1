@@ -9,20 +9,18 @@ An enterprise-grade Data Engineering and Analytics solution transforming retail 
 
 ## 📊 Power BI Dashboard Screenshots
 
-The project features a professional 4-page Power BI Dashboard:
-
 1. **Executive Sales Overview:**  
-   ![Executive Sales](04_PowerBI_Dashboard/Dashboard_Screenshots/executive_sales.png)
+   ![Executive Sales](mini%20project/Sales-Dashboard-Connected-to-SQL/04_PowerBI_Dashboard/Dashboard_Screenshots/Executive%20overview.png)
 
 2. **Customer Insights:**  
-   ![Customer Insights](04_PowerBI_Dashboard/Dashboard_Screenshots/customer_insights.png)
+   ![Customer Insights](mini%20project/Sales-Dashboard-Connected-to-SQL/04_PowerBI_Dashboard/Dashboard_Screenshots/Customer%20Insight.png)
 
 3. **Product Performance:**  
-   ![Product Performance](04_PowerBI_Dashboard/Dashboard_Screenshots/product_performance.png)
+   ![Product Performance](mini%20project/Sales-Dashboard-Connected-to-SQL/04_PowerBI_Dashboard/Dashboard_Screenshots/Product%20Performance.png)
 
 4. **Future Insights & Forecasting:**  
-   ![Future Insights](04_PowerBI_Dashboard/Dashboard_Screenshots/future_insights.png)
-
+   ![Future Insights](mini%20project/Sales-Dashboard-Connected-to-SQL/04_PowerBI_Dashboard/Dashboard_Screenshots/Home.jpeg)
+   
 ---
 
 ## 💡 Key Business Metrics & Findings
