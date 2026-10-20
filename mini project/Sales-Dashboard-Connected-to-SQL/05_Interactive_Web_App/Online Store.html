@@ -3,9 +3,13 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>OnlineStoreDB - Ultimate Analytics Dashboard & Portfolio</title>
+    <title>OnlineStoreDB - Ultimate Analytics Dashboard & AI Assistant</title>
     <!-- Chart.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <!-- Tailwind CSS CDN (for AI Chat UI) -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- SheetJS for Excel & CSV parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
             --bg: #0e1524;
@@ -32,7 +36,7 @@
         .app { display: grid; grid-template-columns: 240px minmax(0, 1fr); min-height: 100vh; }
         
         /* Sidebar */
-        nav { background: var(--nav); color: #fff; padding: 20px 15px; display: flex; flex-direction: column; gap: 6px; box-shadow: 2px 0 15px rgba(0,0,0,0.1); position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+        nav { background: var(--nav); color: #fff; padding: 20px 15px; display: flex; flex-direction: column; gap: 6px; box-shadow: 2px 0 15px rgba(0,0,0,0.1); position: sticky; top: 0; height: 100vh; overflow-y: auto; z-index: 10; }
         nav h1 { font-size: 18px; margin: 0 5px 20px; color: #fff; font-weight: 800; text-align: center; }
         .nb { display: block; width: 100%; text-align: right; background: none; border: 0; color: #c9d4ee; padding: 12px 14px; border-radius: 10px; font: inherit; cursor: pointer; transition: all 0.2s; font-weight: 600; }
         [dir="ltr"] .nb { text-align: left; }
@@ -50,29 +54,28 @@
         .btn:hover { background: var(--hv); }
         .btn.p { background: var(--ac); border-color: var(--ac); color: #fff; }
 
-        /* Comprehensive KPI Grid */
+        /* KPI Grid */
         .kp { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .k { background: var(--card); border: 1px solid var(--bd); border-radius: 14px; padding: 16px; display: flex; gap: 14px; align-items: center; box-shadow: 0px 10px 30px rgba(0,0,0,0.05); }
         .k i { font-style: normal; font-size: 24px; background: var(--hv); border-radius: 10px; width: 48px; height: 48px; display: grid; place-items: center; }
         .k small { display: block; color: var(--mu); font-size: 12px; margin-bottom: 4px; }
         .k b { font-size: 18px; color: var(--tx); }
 
-        /* Charts & Cards Grid */
+        /* Charts Grid */
         .g { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 18px; margin-bottom: 18px; }
         @media(min-width: 1100px) { .w2 { grid-column: span 2; } }
         .card { background: var(--card); border: 1px solid var(--bd); border-radius: 14px; padding: 18px; box-shadow: 0px 10px 30px rgba(0,0,0,0.05); }
         .card h3 { margin: 0 0 12px; font-size: 15px; color: var(--tx); display: flex; justify-content: space-between; align-items: center; }
-        .card h3 small { color: var(--mu); font-weight: 400; font-size: 12px; }
         .cv { position: relative; height: 300px; width: 100%; }
 
         /* Analysis & Pipeline */
-        .analysis-section, .pipeline-grid, .rec-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
-        .analysis-card, .pipeline-card, .rec-item { background: var(--card); border: 1px solid var(--bd); padding: 22px; border-radius: 14px; border-right: 4px solid var(--ac); box-shadow: 0px 10px 30px rgba(0,0,0,0.05); }
-        [dir="ltr"] .analysis-card, [dir="ltr"] .pipeline-card, [dir="ltr"] .rec-item { border-right: none; border-left: 4px solid var(--ac); }
-        .analysis-card h3, .pipeline-card h3, .rec-item h4 { font-size: 16px; color: var(--ac); margin-bottom: 10px; }
+        .analysis-section, .pipeline-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+        .analysis-card, .pipeline-card { background: var(--card); border: 1px solid var(--bd); padding: 22px; border-radius: 14px; border-right: 4px solid var(--ac); box-shadow: 0px 10px 30px rgba(0,0,0,0.05); }
+        [dir="ltr"] .analysis-card, [dir="ltr"] .pipeline-card { border-right: none; border-left: 4px solid var(--ac); }
+        .analysis-card h3, .pipeline-card h3 { font-size: 16px; color: var(--ac); margin-bottom: 10px; }
         .analysis-card ul { padding-inline-start: 20px; color: var(--mu); font-size: 13px; line-height: 1.7; }
         .analysis-card li { margin-bottom: 6px; }
-        .pipeline-card p, .rec-item p { font-size: 13px; color: var(--mu); line-height: 1.6; margin-bottom: 8px; }
+        .pipeline-card p { font-size: 13px; color: var(--mu); line-height: 1.6; margin-bottom: 8px; }
         .pipeline-card code { background: var(--hv); padding: 2px 6px; border-radius: 4px; font-size: 12px; color: #e5566d; }
 
         @media(max-width: 800px) {
@@ -121,7 +124,7 @@ const LANG = {
         ai: "🤖 المساعد الذكي (AI App)",
         themeBtn: "◐ المظهر",
         langBtn: "🌐 English",
-        kpis: { s: "إجمالي المبيعات", n: "إجمالي الطلبات", c: "إجمالي العملاء", aov: "متوسط قيمة الطلب", yoy: "النمو السنوي YoY", rpc: "العائد / عميل", dd: "متوسط أيام التوصيل", p: "إجمالي المنتجات", ct: "عدد الفئات" },
+        kpis: { s: "إجمالي المبيعات", n: "إجمالي الطلبات", c: "إجمالي العملاء", aov: "متوسط قيمة الطلب", yoy: "النمو السنوي YoY", rpc: "العائد / عميل", dd: "متوسط أيام التوصيل", p: "إجمالي المنتجات" },
         charts: {
             trend: "الاتجاه الزمني للمبيعات (متحرك 3 أشهر)",
             cat: "المبيعات حسب الفئة الرئيسية (Categories)",
@@ -168,8 +171,8 @@ const LANG = {
         ],
         pipelineSteps: [
             { title: "01. تنظيف البيانات (Data Cleaning)", desc: "استخدام مكتبة Pandas في بايثون لمعالجة القيم المفقودة والتكرارات وتوحيد التواريخ.", file: "01_Python_Cleaning/" },
-            { title: "02. نمذجة قاعدة البيانات (SQL Database)", desc: "تصميم نموذج النجوم (Star Schema) وتقسيم البيانات إلى 4 جداول (Customers, Orders, OrderDetails, Products) مع قيود المفاتيح.", file: "03_sql_database/" },
-            { title: "03. لوحات المؤشرات (Power BI)", desc: "تطوير تقرير تفاعلي من 4 صفحات يشمل Executive Overview و Customer Insights و Product Performance مع معادلات DAX متقدمة.", file: "OnlineStore_measures.pbix" },
+            { title: "02. نمذجة قاعدة البيانات (SQL Database)", desc: "تصميم نموذج النجوم (Star Schema) وتقسيم البيانات إلى 4 جداول مع قيود المفاتيح.", file: "03_sql_database/" },
+            { title: "03. لوحات المؤشرات (Power BI)", desc: "تطوير تقرير تفاعلي من 4 صفحات يشمل Executive Overview و Customer Insights مع معادلات DAX.", file: "OnlineStore_measures.pbix" },
             { title: "04. تطبيق الويب الذكي (AI Web App)", desc: "تطوير تطبيق ويب مدمج مع Google Gemini API للإجابة الفورية عن استفسارات المبيعات بدقة.", file: "05_Interactive_Web_App/" }
         ]
     },
@@ -181,7 +184,7 @@ const LANG = {
         ai: "🤖 AI Assistant App",
         themeBtn: "◐ Theme",
         langBtn: "🌐 العربية",
-        kpis: { s: "Total Sales", n: "Total Orders", c: "Total Customers", aov: "Avg Order Value", yoy: "YoY Growth", rpc: "Revenue / Customer", dd: "Avg Delivery Days", p: "Total Products", ct: "Categories" },
+        kpis: { s: "Total Sales", n: "Total Orders", c: "Total Customers", aov: "Avg Order Value", yoy: "YoY Growth", rpc: "Revenue / Customer", dd: "Avg Delivery Days", p: "Total Products" },
         charts: {
             trend: "Monthly Sales Trend & Moving Average",
             cat: "Sales by Main Category",
@@ -228,8 +231,8 @@ const LANG = {
         ],
         pipelineSteps: [
             { title: "01. Data Cleaning (Python)", desc: "Processed raw records using Pandas to handle missing values and normalize formats.", file: "01_Python_Cleaning/" },
-            { title: "02. SQL Database Architecture", desc: "Designed a Star Schema in SQL Server splitting data into 4 relational tables with foreign keys and views.", file: "03_sql_database/" },
-            { title: "03. Power BI Dashboards", desc: "Built a 4-page interactive report covering Executive Overview, Customer Insights, and Forecasting using advanced DAX.", file: "OnlineStore_measures.pbix" },
+            { title: "02. SQL Database Architecture", desc: "Designed a Star Schema in SQL Server splitting data into 4 relational tables.", file: "03_sql_database/" },
+            { title: "03. Power BI Dashboards", desc: "Built a 4-page interactive report covering Executive Overview and Customer Insights.", file: "OnlineStore_measures.pbix" },
             { title: "04. Interactive AI Web App", desc: "Developed a client-side web assistant powered by Google Gemini API for real-time querying.", file: "05_Interactive_Web_App/" }
         ]
     }
@@ -237,6 +240,11 @@ const LANG = {
 
 let currentLang = 'ar', activePage = 'dash';
 const PAL = ["#4318ff","#16b3a5","#ffb547","#e5566d","#8b6ff0","#3aa6d8","#e07b39","#b5588f"];
+
+// AI Assistant State Variables
+let globalDataSummary = "";
+let globalColumns = "";
+let totalRowCount = 0;
 
 let CH = {};
 function ch(id, type, labels, sets, opts = {}) {
@@ -269,7 +277,6 @@ function renderUI() {
         document.getElementById('filterBar').innerHTML = `<button class="btn" onclick="toggleTheme()">${t.themeBtn}</button><button class="btn p" onclick="toggleLang()">${t.langBtn}</button>`;
 
         body.innerHTML = `
-            <!-- Comprehensive KPI Grid -->
             <div class="kp">
                 <div class="k"><i>💰</i><div><small>${t.kpis.s}</small><b>$2,261,536</b></div></div>
                 <div class="k"><i>🛒</i><div><small>${t.kpis.n}</small><b>4,922</b></div></div>
@@ -281,7 +288,6 @@ function renderUI() {
                 <div class="k"><i>📦</i><div><small>${t.kpis.p}</small><b>1,861</b></div></div>
             </div>
 
-            <!-- Charts Grid (All Charts Included) -->
             <div class="g">
                 <div class="card w2"><h3>${t.charts.trend}</h3><div class="cv"><canvas id="c1"></canvas></div></div>
                 <div class="card"><h3>${t.charts.cat}</h3><div class="cv"><canvas id="c2"></canvas></div></div>
@@ -300,7 +306,6 @@ function renderUI() {
             </div>
         `;
 
-        // Render All 8 Charts
         ch('c1', 'line', ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], [
             {label:'Actual Sales', data:[35e3,42e3,38e3,52e3,48e3,65e3,58e3,72e3,68e3,95e3,125e3,105e3], borderColor:PAL[0], backgroundColor:PAL[0]+'33', fill:true, tension:0.3},
             {label:'3-Month Moving Avg', data:[null,null,38e3,44e3,46e3,55e3,57e3,65e3,66e3,78e3,96e3,108e3], borderColor:PAL[2], borderDash:[4,4], tension:0.3}
@@ -350,22 +355,237 @@ function renderUI() {
 
     } else if (activePage === 'ai') {
         document.getElementById('pageTitleHeading').textContent = t.ai;
-        document.getElementById('subHeaderInfo').textContent = currentLang === 'ar' ? 'المساعد الذكي للتحليل' : 'AI Data Analytics Assistant';
+        document.getElementById('subHeaderInfo').textContent = currentLang === 'ar' ? 'مساعد تحليل البيانات الذكي (Gemini AI)' : 'AI Data Analytics Assistant';
         document.getElementById('filterBar').innerHTML = `<button class="btn" onclick="toggleTheme()">${t.themeBtn}</button><button class="btn p" onclick="toggleLang()">${t.langBtn}</button>`;
 
         body.innerHTML = `
-            <div class="card" style="text-align:center; padding:50px;">
-                <h3 style="justify-content:center; margin-bottom:15px; font-size:22px;">🤖 Gemini AI Data Assistant</h3>
-                <p style="color:var(--mu); margin-bottom:25px; max-width:600px; margin-inline:auto; line-height:1.6;">${currentLang==='ar'?'تم ربط النظام بـ Google Gemini API مع قيود صارمة (Guardrails) للإجابة حصرياً من بيانات المبيعات الحقيقية.':'Integrated with Google Gemini API with strict guardrails ensuring answers are strictly constrained to retail sales dataset.'}</p>
-                <a href="https://hosammahmoh-star.github.io/DEPI-ONL5-Team-1/mini%20project/Sales-Dashboard-Connected-to-SQL/05_Interactive_Web_App/" target="_blank" class="btn p" style="padding:12px 24px; font-size:15px; text-decoration:none; display:inline-block;">🚀 ${currentLang==='ar'?'فتح التطبيق أونلاين':'Launch Live App'}</a>
+            <div class="w-full max-w-4xl mx-auto bg-slate-800 rounded-2xl shadow-2xl overflow-hidden border border-slate-700 flex flex-col h-[75vh]">
+                <!-- Header -->
+                <div class="bg-slate-900 p-4 border-b border-slate-700 flex justify-between items-center">
+                    <h3 class="text-lg font-bold text-emerald-400 flex items-center gap-2">
+                        🤖 مساعد تحليل البيانات الذكي (Gemini AI)
+                    </h3>
+                    <span id="status-badge" class="px-3 py-1 bg-amber-500/20 text-amber-300 text-xs rounded-full border border-amber-500/30">
+                        جاري تحميل البيانات من GitHub...
+                    </span>
+                </div>
+
+                <!-- Configuration Panel -->
+                <div class="bg-slate-800/80 p-4 border-b border-slate-700 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold mb-1 text-slate-300">مفتاح الـ Gemini API Key:</label>
+                        <input type="password" id="api-key" placeholder="أدخل المفتاح هنا (API Key)" 
+                            class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1 text-slate-300">اختر ملف بيانات آخر (اختياري - CSV أو Excel):</label>
+                        <input type="file" id="file-input" accept=".csv, .xlsx, .xls" 
+                            class="w-full bg-slate-900 border border-slate-600 rounded-lg px-2 py-1.5 text-sm text-slate-400 file:ml-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-emerald-600 file:text-white hover:file:bg-emerald-700 cursor-pointer">
+                    </div>
+                </div>
+
+                <!-- Chat / Results Area -->
+                <div id="chat-container" class="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-900/50">
+                    <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 max-w-[85%]">
+                        <p class="text-sm text-emerald-300 font-semibold mb-1">مرحباً بك!</p>
+                        <p class="text-sm text-slate-300">للبدء: أدخل مفتاح الـ API، وسيقوم النظام بتحليل الملف تلقائياً. يمكنك طرح أي سؤال حول المبيعات والمنتجات والعملاء وسيجيبك الذكاء الاصطناعي فوراً.</p>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="p-4 bg-slate-800 border-t border-slate-700 flex gap-2">
+                    <input type="text" id="user-input" placeholder="اكتب سؤالك هنا (مثلاً: كم إجمالي المبيعات؟)..." 
+                        class="flex-1 bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 disabled:opacity-50" disabled>
+                    <button id="send-btn" onclick="askGemini()" 
+                        class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-3 rounded-xl transition-all disabled:opacity-50 cursor-pointer" disabled>
+                        إرسال 🚀
+                    </button>
+                </div>
             </div>
         `;
+
+        initAIAssistant();
     }
 }
 
-function switchPage(p) { activePage = p; document.querySelectorAll('.nb').forEach(b => b.classList.toggle('on', b.dataset.p === p)); renderUI(); }
-function toggleLang() { currentLang = currentLang === 'ar' ? 'en' : 'ar'; renderUI(); }
-function toggleTheme() { const root = document.documentElement; root.setAttribute('data-theme', root.getAttribute('data-theme') === 'light' ? 'dark' : 'light'); renderUI(); }
+function switchPage(p) { 
+    activePage = p; 
+    document.querySelectorAll('.nb').forEach(b => b.classList.toggle('on', b.dataset.p === p)); 
+    renderUI(); 
+}
+
+function toggleLang() { 
+    currentLang = currentLang === 'ar' ? 'en' : 'ar'; 
+    renderUI(); 
+}
+
+function toggleTheme() { 
+    const root = document.documentElement; 
+    root.setAttribute('data-theme', root.getAttribute('data-theme') === 'light' ? 'dark' : 'light'); 
+    renderUI(); 
+}
+
+// AI Assistant Data Fetching & Handling
+function initAIAssistant() {
+    const defaultPaths = [
+        '../01_Python_Cleaning/train_cleaned.csv',
+        '../02_python_processing/train_cleaned.csv',
+        'https://raw.githubusercontent.com/hosammahmoh-star/DEPI-ONL5-Team-1/main/mini%20project/Sales-Dashboard-Connected-to-SQL/01_Python_Cleaning/train_cleaned.csv',
+        'https://raw.githubusercontent.com/hosammahmoh-star/DEPI-ONL5-Team-1/main/mini%20project/Sales-Dashboard-Connected-to-SQL/02_python_processing/train_cleaned.csv',
+        'train_cleaned.csv'
+    ];
+    tryFetchDefaultData(defaultPaths, 0);
+
+    const fileInput = document.getElementById('file-input');
+    if(fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            if (file.name.endsWith('.csv')) {
+                reader.onload = function(event) { processData(event.target.result); };
+                reader.readAsText(file);
+            } else {
+                reader.onload = function(e) {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const csvData = XLSX.utils.sheet_to_csv(worksheet);
+                    processData(csvData);
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        });
+    }
+}
+
+function tryFetchDefaultData(paths, index) {
+    if (index >= paths.length) {
+        const badge = document.getElementById('status-badge');
+        if(badge) {
+            badge.textContent = "في انتظار رفع الملف يدوياً 📁";
+            badge.className = "px-3 py-1 bg-amber-500/20 text-amber-300 text-xs rounded-full border border-amber-500/30";
+        }
+        return;
+    }
+    fetch(paths[index])
+        .then(response => {
+            if (!response.ok) throw new Error("File not found");
+            return response.text();
+        })
+        .then(csvText => {
+            processData(csvText);
+            const badge = document.getElementById('status-badge');
+            if(badge) {
+                badge.textContent = `تم تحميل بيانات جيثب تلقائياً (${totalRowCount.toLocaleString()} صف) ✅`;
+                badge.className = "px-3 py-1 bg-emerald-500/20 text-emerald-300 text-xs rounded-full border border-emerald-500/30";
+            }
+        })
+        .catch(() => {
+            tryFetchDefaultData(paths, index + 1);
+        });
+}
+
+function processData(csvText) {
+    const lines = csvText.trim().split('\n');
+    globalColumns = lines[0];
+    totalRowCount = lines.length - 1;
+    globalDataSummary = csvText;
+
+    const badge = document.getElementById('status-badge');
+    if(badge) {
+        badge.textContent = `تم تحميل البيانات (${totalRowCount.toLocaleString()} صف) ✅`;
+        badge.className = "px-3 py-1 bg-emerald-500/20 text-emerald-300 text-xs rounded-full border border-emerald-500/30";
+    }
+
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+    if(userInput) userInput.disabled = false;
+    if(sendBtn) sendBtn.disabled = false;
+
+    appendMessage("النظام", `تم قراءة الملف بنجاح! إجمالي عدد الصفوف في البيانات هو: ${totalRowCount.toLocaleString()} صف. يمكنك طرح أسئلتك الآن.`, "emerald");
+}
+
+async function askGemini() {
+    const apiKeyInput = document.getElementById('api-key');
+    const userInputField = document.getElementById('user-input');
+    if(!apiKeyInput || !userInputField) return;
+
+    const apiKey = apiKeyInput.value.trim();
+    const userInput = userInputField.value.trim();
+
+    if (!apiKey) {
+        alert("الرجاء إدخال مفتاح الـ API Key أولاً!");
+        return;
+    }
+    if (!userInput) return;
+
+    appendMessage("أنت", userInput, "blue");
+    userInputField.value = "";
+
+    const loadingId = appendMessage("الذكاء الاصطناعي", "جاري التحليل والبحث في كامل البيانات...", "amber", true);
+
+    const lines = globalDataSummary.trim().split('\n');
+    const sampleData = lines.slice(0, 500).join('\n');
+
+    const prompt = `
+أنت خبير تحليل بيانات محترف ومساعد ذكي للتحليل.
+ملاحظة هامة جداً: إجمالي عدد الصفوف الكلي الحقيقي الموجود في ملف البيانات هو: [ ${totalRowCount} صف ].
+أسماء أعمدة الجدول المتاحة: [ ${globalColumns} ]
+
+إليك عينة تمثيلية واسعة من أصل الـ ${totalRowCount} صف الخاصة بالبيانات:
+${sampleData}
+
+بناءً على تفاصيل ومعطيات البيانات وإجمالي الصفوف (${totalRowCount} صف)، أجِب عن سؤال المستخدم بدقة واحترافية وباللغة العربية:
+${userInput}
+    `;
+
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.error?.message || `خطأ في الاتصال (Code: ${response.status})`);
+        }
+
+        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "عذراً، لم أتمكن من الحصول على رد.";
+        updateMessage(loadingId, reply);
+    } catch (error) {
+        updateMessage(loadingId, "عذراً، حدث خطأ: " + error.message);
+    }
+}
+
+function appendMessage(sender, text, color) {
+    const chatContainer = document.getElementById('chat-container');
+    if(!chatContainer) return '';
+    const msgId = 'msg-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+    const align = sender === 'أنت' ? 'mr-auto bg-slate-700' : 'ml-auto bg-slate-800 border border-slate-700';
+    
+    const html = `
+        <div id="${msgId}" class="p-3 rounded-xl max-w-[85%] ${align} mb-3 shadow">
+            <p class="text-xs font-bold text-${color}-400 mb-1">${sender}</p>
+            <p class="text-sm text-slate-200 whitespace-pre-wrap">${text}</p>
+        </div>
+    `;
+    chatContainer.insertAdjacentHTML('beforeend', html);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+    return msgId;
+}
+
+function updateMessage(msgId, newText) {
+    const msgElement = document.getElementById(msgId);
+    if (msgElement) {
+        const pTag = msgElement.querySelector('p.text-slate-200');
+        if(pTag) pTag.textContent = newText;
+    }
+    const chatContainer = document.getElementById('chat-container');
+    if(chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
+}
 
 document.querySelectorAll('.nb').forEach(b => b.onclick = () => switchPage(b.dataset.p));
 renderUI();
