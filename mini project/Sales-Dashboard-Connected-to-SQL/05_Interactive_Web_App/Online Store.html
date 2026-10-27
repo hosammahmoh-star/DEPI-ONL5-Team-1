@@ -508,12 +508,12 @@ function processData(csvText) {
 }
 
 // دالة مساعدة لإعادة المحاولة تلقائياً عند وجود ضغط على السيرفر
+// دالة مساعدة لإعادة المحاولة تلقائياً عند وجود ضغط على السيرفر
 async function fetchWithRetry(url, options, retries = 3, backoff = 1000) {
     try {
         const response = await fetch(url, options);
         const data = await response.json();
         
-        // في حالة وجود خطأ بسبب الضغط العالي أو كثرة الطلبات (Rate Limit)
         if (!response.ok && data.error) {
             const errorMsg = data.error.message || "";
             const isHighDemand = errorMsg.toLowerCase().includes("high demand") || 
@@ -521,7 +521,6 @@ async function fetchWithRetry(url, options, retries = 3, backoff = 1000) {
                                  response.status === 429;
 
             if (isHighDemand && retries > 0) {
-                // الانتظار لفترة قصيرة قبل إعادة المحاولة
                 await new Promise(resolve => setTimeout(resolve, backoff));
                 return fetchWithRetry(url, options, retries - 1, backoff * 1.5);
             }
@@ -566,19 +565,19 @@ async function askGemini() {
 إليك عينة تمثيلية واسعة من أصل الـ ${totalRowCount} صف الخاصة بالبيانات:
 ${sampleData}
 
-بناءً على تفاصيل ومعطيات البيانات وإجمالي الصفوف (${totalRowCount} صف)، أجِب عن سؤال المستخدم بدقة واحترافية وباللغة العربية:
+بناءً على تفاصيل ومعطيات البيانات وإجمالي الصفوف (${totalRowCount} صف)، أجِب عن سؤال المستخدم بدقة واحترّافية وباللغة العربية:
 ${userInput}
     `;
 
     try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        // استخدام الموديل الصحيح 3.8-flash بناءً على توجيه السيرفر
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
         const options = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         };
 
-        // استدعاء الدالة الذكية للربط مع المحاولة التلقائية
         const { response, data } = await fetchWithRetry(url, options);
 
         if (!response.ok) {
